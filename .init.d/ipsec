@@ -1,0 +1,82 @@
+#!/sbin/runscript
+
+extra_commands="flush"
+
+IPSEC_HOSTS_FILE=${IPSEC_CONFIG_SCRIPT:-/etc/ipsechosts}
+LOCAL_HOSTNAME=`hostname --fqdn`
+
+depend() {
+	need net
+}
+
+start() {
+	ebegin "Starting ipsec"
+	STATUS=0
+	check || STATUS=1
+	if [ "${STATUS}" -eq 0 ];then
+		load || STATUS=2
+		[ "${STATUS}" -eq 2 ] && flush
+	fi
+	eend $STATUS
+}
+
+stop() {
+	ebegin "Stopping ipsec"
+	flush
+	eend $?
+}
+
+check() {
+	ebegin "Checking ipsec"
+	STATUS_CHECK=0
+	if [ -f "${IPSEC_HOSTS_FILE}" ]; then
+		ERROR_SPI=`awk '{print $3}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
+		if [ -n "$ERROR_SPI" ];then
+			eerror "SPI is not unique: ${ERROR_SPI}"
+			STATUS_CHECK=3
+		fi
+		ERROR_IP=`awk '{print $1}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
+		if [ -n "$ERROR_IP" ];then
+			eerror "IP is not unique: ${ERROR_IP}"
+			STATUS_CHECK=4
+		fi
+	else
+		eerror "ipsechosts file ${IPSEC_HOSTS_FILE} doesn't exist"
+		STATUS_CHECK=2
+	fi
+	eend $STATUS_CHECK
+}
+
+load() {
+	ebegin "Loading ipsec"
+	STATUS_LOAD=0
+	while read ITR ITR_HOSTNAME ITR_SPI ITR_PSK; do
+		if [ ${ITR_HOSTNAME} == ${LOCAL_HOSTNAME} ]; then
+			echo "--- ${ITR_SPI} / ${ITR_PSK} - ${ITR} (${ITR_HOSTNAME}) "
+			while read RPD RPD_HOSTNAME RPD_SPI RPD_PSK; do 
+				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ]; then
+					echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
+					
+					ip xfrm state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
+						mode transport aead "rfc4106(gcm(aes))" ${RPD_PSK} 96 || STATUS_LOAD=5
+					[ ${STATUS_LOAD} -eq 0 ] || eerror "SA failed"
+					
+					ip xfrm state add src ${RPD} dst ${ITR} proto esp spi 0x${RPD_SPI}${ITR_SPI} \
+						mode transport aead "rfc4106(gcm(aes))" ${ITR_PSK} 96 || STATUS_LOAD=6
+					[ ${STATUS_LOAD} -eq 0 ] || eerror "SA failed"
+					
+					ip xfrm policy add dir out src ${ITR} dst ${RPD} tmpl proto esp mode transport || STATUS_LOAD=7
+					[ ${STATUS_LOAD} -eq 0 ] || eerror "SP failed" 
+				fi
+			done < ${IPSEC_HOSTS_FILE}
+		fi
+	done < ${IPSEC_HOSTS_FILE}
+	eend $STATUS_LOAD
+}
+
+flush() {
+	ebegin "Flushing ipsec" 
+		ip xfrm state flush
+		ip xfrm policy flush
+	eend $?
+}
