@@ -1,32 +1,38 @@
 #!/sbin/runscript
 
 extra_commands="flush"
+extra_started_commands="update"
 
-IPSEC_HOSTS_FILE=${IPSEC_CONFIG_SCRIPT:-/etc/ipsechosts}
+IPSEC_HOSTS_STABLE=${IPSEC_HOSTS_STABLE:-/var/lib/ipsec/ipsechosts}
+IPSEC_HOSTS_UPDATE=${IPSEC_HOSTS_UPDATE:-/var/lib/ipsec/ipsechosts-update}
 LOCAL_HOSTNAME=`hostname --fqdn`
 
 depend() {
 	need net
 }
 
+update() {
+	check ${IPSEC_HOSTS_UPDATE} || return 1
+	flush
+	load ${IPSEC_HOSTS_LOAD} || start
+}
+
 start() {
-	ebegin "Starting ipsec"
-	STATUS=0
-	check || STATUS=1
-	if [ "${STATUS}" -eq 0 ];then
-		load || STATUS=2
-		[ "${STATUS}" -eq 2 ] && flush
+	check ${IPSEC_HOSTS_STABLE} || return 1
+	flush
+	load ${IPSEC_HOSTS_STABLE}
+	if ! [ $? -eq 0 ]; then
+		flush
+		return 1
 	fi
-	eend $STATUS
 }
 
 stop() {
-	ebegin "Stopping ipsec"
 	flush
-	eend $?
 }
 
 check() {
+	IPSEC_HOSTS_FILE=$1
 	ebegin "Checking ipsec"
 	STATUS_CHECK=0
 	if [ -f "${IPSEC_HOSTS_FILE}" ]; then
@@ -48,7 +54,8 @@ check() {
 }
 
 load() {
-	ebegin "Loading ipsec"
+	IPSEC_HOSTS_FILE=$1
+	ebegin "Loading ipsec ${IPSEC_HOSTS_FILE}"
 	STATUS_LOAD=0
 	while read ITR ITR_HOSTNAME ITR_SPI ITR_PSK; do
 		if [ ${ITR_HOSTNAME} == ${LOCAL_HOSTNAME} ]; then
