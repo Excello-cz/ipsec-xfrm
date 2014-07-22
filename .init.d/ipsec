@@ -14,7 +14,13 @@ depend() {
 update() {
 	check ${IPSEC_HOSTS_UPDATE} || return 1
 	flush
-	load ${IPSEC_HOSTS_LOAD} || start
+	load ${IPSEC_HOSTS_UPDATE}
+	if [ $? -eq 0 ]; then
+		cp ${IPSEC_HOSTS_UPDATE} ${IPSEC_HOSTS_STABLE}
+	else
+		start
+		return 1
+	fi
 }
 
 start() {
@@ -36,6 +42,12 @@ check() {
 	ebegin "Checking ipsec"
 	STATUS_CHECK=0
 	if [ -f "${IPSEC_HOSTS_FILE}" ]; then
+		COUNT_AWK=`awk '{print $4}' ${IPSEC_HOSTS_FILE} | wc -l`
+		COUNT_FILE=`cat ${IPSEC_HOSTS_FILE} | wc -l`
+		if [ "COUNT_AWK" != "COUNT_FILE" ];then
+			eerror "ipsechosts file has empty rows"
+			STATUS_CHECK=3
+		fi
 		ERROR_SPI=`awk '{print $3}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
 		if [ -n "$ERROR_SPI" ];then
 			eerror "SPI is not unique: ${ERROR_SPI}"
@@ -64,11 +76,11 @@ load() {
 				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ]; then
 					echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
 					
-					ip xfrm state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
+					ip xfrm state add src ${ITR} dst ${RPD} proto esp spi ${ITR_SPI}${RPD_SPI} \
 						mode transport aead "rfc4106(gcm(aes))" ${RPD_PSK} 96 || STATUS_LOAD=5
 					[ ${STATUS_LOAD} -eq 0 ] || eerror "SA failed"
 					
-					ip xfrm state add src ${RPD} dst ${ITR} proto esp spi 0x${RPD_SPI}${ITR_SPI} \
+					ip xfrm state add src ${RPD} dst ${ITR} proto esp spi ${RPD_SPI}${ITR_SPI} \
 						mode transport aead "rfc4106(gcm(aes))" ${ITR_PSK} 96 || STATUS_LOAD=6
 					[ ${STATUS_LOAD} -eq 0 ] || eerror "SA failed"
 					
