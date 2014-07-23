@@ -75,12 +75,12 @@ load() {
 		if [ ${ITR_HOSTNAME} == ${LOCAL_HOSTNAME} ]; then
 			ITR_IPV4=false
 			isipv4 ${ITR} && ITR_IPV4=true
-			echo "--- ${ITR_SPI} / ${ITR_PSK} - ${ITR} (${ITR_HOSTNAME}) "
+			#echo "--- ${ITR_SPI} / ${ITR_PSK} - ${ITR} (${ITR_HOSTNAME}) "
 			while read RPD RPD_HOSTNAME RPD_SPI RPD_PSK; do
 				RPD_IPV4=false
 				isipv4 ${RPD} && RPD_IPV4=true
 				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ] && [ "${ITR_IPV4}" = "${RPD_IPV4}" ]; then
-					echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
+					#echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
 					
 					${IP_XFRM} state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
 						mode transport aead "rfc4106(gcm(aes))" 0x${RPD_PSK} 96 || STATUS_LOAD=5
