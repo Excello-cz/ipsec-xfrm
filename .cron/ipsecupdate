@@ -1,0 +1,6 @@
+#!/bin/bash
+RSYNC="/usr/bin/rsync -t -p -o -g -u -r -z rsync://sync.virusfree.cz/var/lib/ipsec/ipsechosts-update /var/lib/ipsec/"
+CMP="cmp /var/lib/ipsec/ipsechosts /var/lib/ipsec/ipsechosts-update"
+RELOADIPSEC="/etc/init.d/ipsec update"
+
+$RSYNC && (${CMP} || ${RELOADIPSEC})

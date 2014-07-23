@@ -5,7 +5,8 @@ extra_started_commands="update"
 
 IPSEC_HOSTS_STABLE=${IPSEC_HOSTS_STABLE:-/var/lib/ipsec/ipsechosts}
 IPSEC_HOSTS_UPDATE=${IPSEC_HOSTS_UPDATE:-/var/lib/ipsec/ipsechosts-update}
-LOCAL_HOSTNAME=`hostname --fqdn`
+LOCAL_HOSTNAME=`/bin/hostname --fqdn`
+IP_XFRM="/bin/ip xfrm"
 
 depend() {
 	need net
@@ -16,10 +17,10 @@ update() {
 	flush
 	load ${IPSEC_HOSTS_UPDATE}
 	if [ $? -eq 0 ]; then
-		cp ${IPSEC_HOSTS_UPDATE} ${IPSEC_HOSTS_STABLE}
+		mv ${IPSEC_HOSTS_UPDATE} ${IPSEC_HOSTS_STABLE}
 	else
-		start
-		return 1
+		eerror "Update failed - restarting"
+		rc-service ipsec restart
 	fi
 }
 
@@ -27,9 +28,10 @@ start() {
 	check ${IPSEC_HOSTS_STABLE} || return 1
 	flush
 	load ${IPSEC_HOSTS_STABLE}
-	if ! [ $? -eq 0 ]; then
+	if [ $? -ne 0 ]; then
+		eerror "Start failed - stopping"
 		flush
-		return 1
+		return 2
 	fi
 }
 
@@ -38,16 +40,16 @@ stop() {
 }
 
 check() {
-	IPSEC_HOSTS_FILE=$1
-	ebegin "Checking ipsec"
-	STATUS_CHECK=0
+	local IPSEC_HOSTS_FILE=$1
+	local STATUS_CHECK=0
+	ebegin "Checking ipsec hosts file ${IPSEC_HOSTS_FILE}"
 	if [ -f "${IPSEC_HOSTS_FILE}" ]; then
 		COUNT_AWK=`awk '{print $4}' ${IPSEC_HOSTS_FILE} | wc -l`
 		COUNT_FILE=`cat ${IPSEC_HOSTS_FILE} | wc -l`
 		if [ "COUNT_AWK" != "COUNT_FILE" ];then
-			eerror "ipsechosts file has empty rows"
+			eerror "ipsechosts file ${IPSEC_HOSTS_FILE} has empty rows"
 			STATUS_CHECK=3
-		fi
+                fi
 		ERROR_SPI=`awk '{print $3}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
 		if [ -n "$ERROR_SPI" ];then
 			eerror "SPI is not unique: ${ERROR_SPI}"
@@ -66,9 +68,9 @@ check() {
 }
 
 load() {
-	IPSEC_HOSTS_FILE=$1
-	ebegin "Loading ipsec ${IPSEC_HOSTS_FILE}"
-	STATUS_LOAD=0
+	local IPSEC_HOSTS_FILE=$1
+	local STATUS_LOAD=0
+	ebegin "Loading associations and policies from ${IPSEC_HOSTS_FILE}" 
 	while read ITR ITR_HOSTNAME ITR_SPI ITR_PSK; do
 		if [ ${ITR_HOSTNAME} == ${LOCAL_HOSTNAME} ]; then
 			echo "--- ${ITR_SPI} / ${ITR_PSK} - ${ITR} (${ITR_HOSTNAME}) "
@@ -76,16 +78,16 @@ load() {
 				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ]; then
 					echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
 					
-					ip xfrm state add src ${ITR} dst ${RPD} proto esp spi ${ITR_SPI}${RPD_SPI} \
+					${IP_XFRM} state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
 						mode transport aead "rfc4106(gcm(aes))" ${RPD_PSK} 96 || STATUS_LOAD=5
-					[ ${STATUS_LOAD} -eq 0 ] || eerror "SA failed"
+					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security association failed 0x${ITR_SPI}${RPD_SPI}"
 					
-					ip xfrm state add src ${RPD} dst ${ITR} proto esp spi ${RPD_SPI}${ITR_SPI} \
+					${IP_XFRM} state add src ${RPD} dst ${ITR} proto esp spi 0x${RPD_SPI}${ITR_SPI} \
 						mode transport aead "rfc4106(gcm(aes))" ${ITR_PSK} 96 || STATUS_LOAD=6
-					[ ${STATUS_LOAD} -eq 0 ] || eerror "SA failed"
+					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security association failed 0x${RPD_SPI}${RPD_SPI}"
 					
-					ip xfrm policy add dir out src ${ITR} dst ${RPD} tmpl proto esp mode transport || STATUS_LOAD=7
-					[ ${STATUS_LOAD} -eq 0 ] || eerror "SP failed" 
+					${IP_XFRM} policy add dir out src ${ITR} dst ${RPD} tmpl proto esp mode transport || STATUS_LOAD=7
+					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security policy failed ${RPD} (${RPD_HOSTNAME})"
 				fi
 			done < ${IPSEC_HOSTS_FILE}
 		fi
@@ -94,8 +96,8 @@ load() {
 }
 
 flush() {
-	ebegin "Flushing ipsec" 
-		ip xfrm state flush
-		ip xfrm policy flush
+	ebegin "Flushing associations and policies" 
+		${IP_XFRM} state flush
+		${IP_XFRM} policy flush
 	eend $?
 }
