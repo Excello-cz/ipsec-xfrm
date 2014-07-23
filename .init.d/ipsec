@@ -44,12 +44,6 @@ check() {
 	local STATUS_CHECK=0
 	ebegin "Checking ipsec hosts file ${IPSEC_HOSTS_FILE}"
 	if [ -f "${IPSEC_HOSTS_FILE}" ]; then
-		COUNT_AWK=`awk '{print $4}' ${IPSEC_HOSTS_FILE} | wc -l`
-		COUNT_FILE=`cat ${IPSEC_HOSTS_FILE} | wc -l`
-		if [ "COUNT_AWK" != "COUNT_FILE" ];then
-			eerror "ipsechosts file ${IPSEC_HOSTS_FILE} has empty rows"
-			STATUS_CHECK=3
-                fi
 		ERROR_SPI=`awk '{print $3}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
 		if [ -n "$ERROR_SPI" ];then
 			eerror "SPI is not unique: ${ERROR_SPI}"
