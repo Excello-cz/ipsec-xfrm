@@ -61,15 +61,25 @@ check() {
 	eend $STATUS_CHECK
 }
 
+isipv4() {
+	local IPV4=`echo $1 | awk '/[0-9]*\.[0-9]*\.[0-9]*\.[0-9]*/ {print $1}'`
+	[ -z "$IPV4" ] && return 1
+	return 0
+}
+
 load() {
 	local IPSEC_HOSTS_FILE=$1
 	local STATUS_LOAD=0
 	ebegin "Loading associations and policies from ${IPSEC_HOSTS_FILE}" 
 	while read ITR ITR_HOSTNAME ITR_SPI ITR_PSK; do
 		if [ ${ITR_HOSTNAME} == ${LOCAL_HOSTNAME} ]; then
+			ITR_IPV4=false
+			isipv4 ${ITR} && ITR_IPV4=true
 			echo "--- ${ITR_SPI} / ${ITR_PSK} - ${ITR} (${ITR_HOSTNAME}) "
-			while read RPD RPD_HOSTNAME RPD_SPI RPD_PSK; do 
-				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ]; then
+			while read RPD RPD_HOSTNAME RPD_SPI RPD_PSK; do
+				RPD_IPV4=false
+				isipv4 ${RPD} && RPD_IPV4=true
+				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ] && [ "${ITR_IPV4}" = "${RPD_IPV4}" ]; then
 					echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
 					
 					${IP_XFRM} state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
