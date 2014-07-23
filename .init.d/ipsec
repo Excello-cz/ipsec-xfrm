@@ -79,11 +79,11 @@ load() {
 					echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
 					
 					${IP_XFRM} state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
-						mode transport aead "rfc4106(gcm(aes))" ${RPD_PSK} 96 || STATUS_LOAD=5
+						mode transport aead "rfc4106(gcm(aes))" 0x${RPD_PSK} 96 || STATUS_LOAD=5
 					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security association failed 0x${ITR_SPI}${RPD_SPI}"
 					
 					${IP_XFRM} state add src ${RPD} dst ${ITR} proto esp spi 0x${RPD_SPI}${ITR_SPI} \
-						mode transport aead "rfc4106(gcm(aes))" ${ITR_PSK} 96 || STATUS_LOAD=6
+						mode transport aead "rfc4106(gcm(aes))" 0x${ITR_PSK} 96 || STATUS_LOAD=6
 					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security association failed 0x${RPD_SPI}${RPD_SPI}"
 					
 					${IP_XFRM} policy add dir out src ${ITR} dst ${RPD} tmpl proto esp mode transport || STATUS_LOAD=7
