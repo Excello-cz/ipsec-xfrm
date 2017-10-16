@@ -68,40 +68,60 @@ isipv4() {
 }
 
 load() {
-	local IPSEC_HOSTS_FILE=$1
-	local STATUS_LOAD=0
-	ebegin "Loading associations and policies from ${IPSEC_HOSTS_FILE}" 
-	while read ITR ITR_HOSTNAME ITR_SPI ITR_PSK; do
-		if [ ${ITR_HOSTNAME} == ${LOCAL_HOSTNAME} ]; then
-			ITR_IPV4=false
-			isipv4 ${ITR} && ITR_IPV4=true
-			#echo "--- ${ITR_SPI} / ${ITR_PSK} - ${ITR} (${ITR_HOSTNAME}) "
-			while read RPD RPD_HOSTNAME RPD_SPI RPD_PSK; do
-				RPD_IPV4=false
-				isipv4 ${RPD} && RPD_IPV4=true
-				if [ ${RPD_HOSTNAME} != ${LOCAL_HOSTNAME} ] && [ "${ITR_IPV4}" = "${RPD_IPV4}" ]; then
-					#echo "  > ${RPD_SPI} / ${RPD_PSK} - ${RPD} ($RPD_HOSTNAME) "
-					
-					${IP_XFRM} state add src ${ITR} dst ${RPD} proto esp spi 0x${ITR_SPI}${RPD_SPI} \
-						mode transport aead "rfc4106(gcm(aes))" 0x${RPD_PSK} 96 || STATUS_LOAD=5
-					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security association failed 0x${ITR_SPI}${RPD_SPI}"
-					
-					${IP_XFRM} state add src ${RPD} dst ${ITR} proto esp spi 0x${RPD_SPI}${ITR_SPI} \
-						mode transport aead "rfc4106(gcm(aes))" 0x${ITR_PSK} 96 || STATUS_LOAD=6
-					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security association failed 0x${RPD_SPI}${RPD_SPI}"
-					
-					${IP_XFRM} policy add dir out src ${ITR} dst ${RPD} tmpl proto esp mode transport || STATUS_LOAD=7
-					[ ${STATUS_LOAD} -eq 0 ] || eerror "Setting security policy failed ${RPD} (${RPD_HOSTNAME})"
-				fi
-			done < ${IPSEC_HOSTS_FILE}
-		fi
-	done < ${IPSEC_HOSTS_FILE}
-	eend $STATUS_LOAD
+	local ipsechosts="${1}"
+
+	local inets="$(
+		ip a \
+		  |sed -n -e 's/^.*\(inet\|inet6\) \([0-9a-f:.]*\)\/.*$/;\2;/p'
+	)"
+	local hosts="$(
+		awk '$1 ~ /^[0-9a-f:.]*$/{print ";"$1";"$3$4}' "${ipsechosts}"
+	)"
+	local lefts="$(
+		echo "${hosts}" \
+		  |grep -F "${inets}" \
+		  |sed -e 's|^;||'
+	)"
+	local rights="$(
+		echo "${hosts}" \
+		  |grep -F -v "${lefts}" \
+		  |sed -e 's|^;||'
+	)"
+
+	for left in ${lefts}; do
+		local leftip6=false
+		isipv4 ${left%%;*} || leftip6=true
+		for right in ${rights}; do
+			local rightip6=false
+			isipv4 ${right%%;*} || rightip6=true
+			if [ $leftip6 == $rightip6 ]; then
+				setxfrm "${left}" "${right}"
+			fi
+		done
+	done
+}
+
+setxfrm() {
+	local lefthost="${1%%;*}"
+	local leftkey="${1##*;}"
+	local righthost="${2%%;*}"
+	local rightkey="${2##*;}"
+	ip xfrm state add \
+	  src "${lefthost}" dst "${righthost}" \
+	  proto esp spi "0x${leftkey:0:2}${rightkey:0:2}" \
+	  mode transport aead "rfc4106(gcm(aes))" "0x${rightkey:2}" 96
+	ip xfrm state add \
+	  src "${righthost}" dst "${lefthost}" \
+	   proto esp spi "0x${rightkey:0:2}${leftkey:0:2}" \
+	  mode transport aead "rfc4106(gcm(aes))" "0x${leftkey:2}" 96
+	ip xfrm policy add dir out \
+	  src "${lefthost}" dst "${righthost}" \
+	  tmpl proto esp mode transport
 }
 
 flush() {
-	ebegin "Flushing associations and policies" 
-		${IP_XFRM} state flush
-		${IP_XFRM} policy flush
+	ebegin "Flushing associations and policies"
+		ip xfrm state flush
+		ip xfrm policy flush
 	eend $?
 }
