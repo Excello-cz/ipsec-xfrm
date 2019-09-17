@@ -1,6 +1,22 @@
-#!/bin/bash
-RSYNC="/usr/bin/rsync -t -p -o -g -u -r -z rsync://sync.virusfree.cz/var/lib/ipsec/ipsechosts-sync /var/lib/ipsec/ipsechosts-update"
-CMP="cmp /var/lib/ipsec/ipsechosts /var/lib/ipsec/ipsechosts-update"
-RELOADIPSEC="/etc/init.d/ipsec update"
+#! /bin/sh
 
-$RSYNC && (${CMP} || ${RELOADIPSEC})
+set -e
+
+IPSEC_DIR='/var/lib/ipsec'
+SYNC_DIR="${IPSEC_DIR}/update/"
+IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
+IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
+
+rsync -tpogurz "rsync://sync.virusfree.cz${SYNC_DIR}" "${SYNC_DIR}"
+find "${SYNC_DIR}" -type f | xargs cat > ${IPSEC_HOSTS_UPDATE}
+
+set +e
+
+cmp "${IPSEC_HOSTS_STABLE}" "${IPSEC_HOSTS_UPDATE}"
+if [[ $? == 1 ]]
+then
+	/etc/init.d/ipsec update
+elif [[ $? == 2 ]]
+then
+	exit $?
+fi
