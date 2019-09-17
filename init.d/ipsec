@@ -75,7 +75,7 @@ load() {
 		  |sed -n -e 's/^.*\(inet\|inet6\) \([0-9a-f:.]*\)\/.*$/;\2;/p'
 	)"
 	local hosts="$(
-		awk '$1 ~ /^[0-9a-f:.]*$/{print ";"$1";"$3$4}' "${ipsechosts}"
+		awk '$1 ~ /^[0-9a-f:.]+$/{print ";"$1";"$3$4}' "${ipsechosts}"
 	)"
 	local lefts="$(
 		echo "${hosts}" \
