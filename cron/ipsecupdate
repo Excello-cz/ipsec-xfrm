@@ -7,7 +7,7 @@ SYNC_DIR="${IPSEC_DIR}/update/"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
-rsync -tpogurz "rsync://sync.virusfree.cz${SYNC_DIR}" "${SYNC_DIR}"
+rsync -tpogurz --delete "rsync://sync.virusfree.cz${SYNC_DIR}" "${SYNC_DIR}"
 find "${SYNC_DIR}" -type f | xargs cat > ${IPSEC_HOSTS_UPDATE}
 
 set +e
