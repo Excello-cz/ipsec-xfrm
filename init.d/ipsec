@@ -70,22 +70,19 @@ isipv4() {
 load() {
 	local ipsechosts="${1}"
 
-	local inets="$(
-		ip a \
-		  |sed -n -e 's/^.*\(inet\|inet6\) \([0-9a-f:.]*\)\/.*$/;\2;/p'
-	)"
-	local hosts="$(
-		awk '$1 ~ /^[0-9a-f:.]+$/{print ";"$1";"$3$4}' "${ipsechosts}"
-	)"
+	local inets="$(ip a | sed -n -e 's/^.*\(inet\|inet6\) \([0-9a-f:.]*\)\/.*$/;\2;/p')"
+	local hosts="$(awk '$1 ~ /^[0-9a-f:.]+$/{ print ";" $1 ";" $3 $4 }' "${ipsechosts}")"
+
 	local lefts="$(
 		echo "${hosts}" \
-		  |grep -F "${inets}" \
-		  |sed -e 's|^;||'
+		| grep -F "${inets}" \
+		| sed -e 's|^;||'
 	)"
+
 	local rights="$(
 		echo "${hosts}" \
-		  |grep -F -v "${lefts}" \
-		  |sed -e 's|^;||'
+		| grep -F -v "${lefts}" \
+		| sed -e 's|^;||'
 	)"
 
 	for _dir in 'in' 'out'; do
