@@ -2,6 +2,8 @@
 
 set -e
 
+umask 077
+
 IPSEC_DIR='/var/lib/ipsec'
 SYNC_DIR="${IPSEC_DIR}/update/"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
