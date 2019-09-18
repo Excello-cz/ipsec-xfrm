@@ -44,12 +44,12 @@ check() {
 	local STATUS_CHECK=0
 	ebegin "Checking ipsec hosts file ${IPSEC_HOSTS_FILE}"
 	if [ -f "${IPSEC_HOSTS_FILE}" ]; then
-		ERROR_SPI=`awk '{print $3}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
+		ERROR_SPI=`awk '/^[^#].*$/{ print $3 }' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
 		if [ -n "$ERROR_SPI" ];then
 			eerror "SPI is not unique: ${ERROR_SPI}"
 			STATUS_CHECK=3
 		fi
-		ERROR_IP=`awk '{print $1}' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
+		ERROR_IP=`awk '/^[^#].*$/{ print $1 }' ${IPSEC_HOSTS_FILE} | sort | uniq -d`
 		if [ -n "$ERROR_IP" ];then
 			eerror "IP is not unique: ${ERROR_IP}"
 			STATUS_CHECK=4
