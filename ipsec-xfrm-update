@@ -11,6 +11,8 @@ IPSEC_DIR='/var/lib/ipsec'
 SYNC_PATH="${IPSEC_DIR}/update/ipsechosts-sync"
 SYNC_FROM="${SYNC_PATH}"
 
+mkdir -p "$(dirname ${SYNC_PATH})"
+
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
