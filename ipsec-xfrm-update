@@ -6,6 +6,8 @@ umask 077
 
 IPSEC_DIR='/var/lib/ipsec'
 
+# End the path with '/' if you sync a directory. (See rsync(1) for more information.
+# The SYNC_PATH MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
 SYNC_PATH="${IPSEC_DIR}/update/"
 SYNC_FROM="${SYNC_PATH}"
 
