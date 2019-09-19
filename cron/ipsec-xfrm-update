@@ -19,7 +19,7 @@ set +e
 cmp "${IPSEC_HOSTS_STABLE}" "${IPSEC_HOSTS_UPDATE}"
 if [[ $? == 1 ]]
 then
-	/etc/init.d/ipsec update
+	/etc/init.d/ipsec-xfrm update
 elif [[ $? == 2 ]]
 then
 	exit $?
