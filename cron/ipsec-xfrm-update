@@ -5,12 +5,15 @@ set -e
 umask 077
 
 IPSEC_DIR='/var/lib/ipsec'
-SYNC_DIR="${IPSEC_DIR}/update/"
+
+SYNC_PATH="${IPSEC_DIR}/update/"
+SYNC_FROM="${SYNC_PATH}"
+
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
-rsync -tpogurz --delete "rsync://sync.virusfree.cz${SYNC_DIR}" "${SYNC_DIR}"
-find "${SYNC_DIR}" -type f -print0 \
+rsync -tpogurz --delete "rsync://sync.virusfree.cz${SYNC_FROM}" "${SYNC_PATH}"
+find "${SYNC_PATH}" -type f -print0 \
 | xargs -0n1 sh -c 'echo "# data from file $0"; cat $0; echo' \
 > ${IPSEC_HOSTS_UPDATE}
 
