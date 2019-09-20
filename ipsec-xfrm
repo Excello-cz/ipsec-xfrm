@@ -19,7 +19,7 @@ update() {
 		mv ${IPSEC_HOSTS_UPDATE} ${IPSEC_HOSTS_STABLE}
 	else
 		eerror "Update failed - restarting"
-		rc-service ipsec-xfrm restart
+		restart
 	fi
 }
 
