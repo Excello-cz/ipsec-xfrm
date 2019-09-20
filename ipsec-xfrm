@@ -6,7 +6,6 @@ extra_started_commands="update"
 IPSEC_HOSTS_STABLE=${IPSEC_HOSTS_STABLE:-/var/lib/ipsec/ipsechosts}
 IPSEC_HOSTS_UPDATE=${IPSEC_HOSTS_UPDATE:-/var/lib/ipsec/ipsechosts-update}
 LOCAL_HOSTNAME=`/bin/hostname --fqdn`
-IP_XFRM="/bin/ip xfrm"
 
 depend() {
 	need net
