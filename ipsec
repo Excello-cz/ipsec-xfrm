@@ -18,6 +18,11 @@ eend() {
 	return $1
 }
 
+restart() {
+	stop
+	start
+}
+
 run() {
 	if [ $1 == "start" ]; then
 		log "Staring IPsec ... "
@@ -30,8 +35,7 @@ run() {
 		stop
 	elif [ $1 == "restart" ]; then
 		log "Restarting IPsec ..."
-		stop
-		start
+		restart
 	else
 		echo "$1 - invalid command"
 		log "$1 - invalid command"
