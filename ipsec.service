@@ -5,9 +5,11 @@ After=systemd-user-sessions.service
 After=network-online.target
 
 [Service]
-Type=simple
+Type=oneshot
 User=root
+RemainAfterExit=yes
 ExecStart=/usr/sbin/ipsec start
+ExecStop=/usr/sbin/ipsec stop
 
 [Install]
 WantedBy=multi-user.target
