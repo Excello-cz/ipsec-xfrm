@@ -1,0 +1,13 @@
+[Unit]
+Description=IPsec service
+After=network.target
+After=systemd-user-sessions.service
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/sbin/ipsec start
+
+[Install]
+WantedBy=multi-user.target
