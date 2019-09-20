@@ -88,15 +88,15 @@ load() {
 	for _dir in 'in' 'out'; do
 		for _desc in 'proto ipv6-icmp' 'dport 22' 'sport 22'; do
 			ip xfrm policy add dir "${_dir}" \
-			  src '::/0' dst '::/0' \
-			  ${_desc} \
-			  priority 2147483548
+				src '::/0' dst '::/0' \
+				${_desc} \
+				priority 2147483548
 		done
 		for _desc in 'proto icmp' 'dport 22' 'sport 22'; do
 			ip xfrm policy add dir "${_dir}" \
-			  src '0.0.0.0/0' dst '0.0.0.0/0' \
-			  ${_desc} \
-			  priority 2147483548
+				src '0.0.0.0/0' dst '0.0.0.0/0' \
+				${_desc} \
+				priority 2147483548
 		done
 	done
 
@@ -119,24 +119,24 @@ setxfrm() {
 	local righthost="${2%%;*}"
 	local rightkey="${2##*;}"
 	ip xfrm state add \
-	  src "${lefthost}" dst "${righthost}" \
-	  proto esp spi "0x${leftkey:0:2}${rightkey:0:2}" \
-	  mode transport aead "rfc4106(gcm(aes))" "0x${rightkey:2}" 96
+		src "${lefthost}" dst "${righthost}" \
+		proto esp spi "0x${leftkey:0:2}${rightkey:0:2}" \
+		mode transport aead "rfc4106(gcm(aes))" "0x${rightkey:2}" 96
 	ip xfrm state add \
-	  src "${righthost}" dst "${lefthost}" \
-	  proto esp spi "0x${rightkey:0:2}${leftkey:0:2}" \
-	  mode transport aead "rfc4106(gcm(aes))" "0x${leftkey:2}" 96
+		src "${righthost}" dst "${lefthost}" \
+		proto esp spi "0x${rightkey:0:2}${leftkey:0:2}" \
+		mode transport aead "rfc4106(gcm(aes))" "0x${leftkey:2}" 96
 	ip xfrm policy add dir out \
-	  src "${lefthost}" dst "${righthost}" \
-	  priority 2147483648 tmpl proto esp mode transport
+		src "${lefthost}" dst "${righthost}" \
+		priority 2147483648 tmpl proto esp mode transport
 	ip xfrm policy add dir in \
-	  src "${righthost}" dst "${lefthost}" \
-	  priority 2147483648 tmpl proto esp mode transport
+		src "${righthost}" dst "${lefthost}" \
+		priority 2147483648 tmpl proto esp mode transport
 }
 
 flush() {
 	ebegin "Flushing associations and policies"
-		ip xfrm state flush
-		ip xfrm policy flush
+	ip xfrm state flush
+	ip xfrm policy flush
 	eend $?
 }
