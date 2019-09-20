@@ -72,30 +72,15 @@ load() {
 	local inets="$(ip a | sed -n -e 's/^.*\(inet\|inet6\) \([0-9a-f:.]*\)\/.*$/;\2;/p')"
 	local hosts="$(awk '$1 ~ /^[0-9a-f:.]+$/{ print ";" $1 ";" $3 $4 }' "${ipsechosts}")"
 
-	local lefts="$(
-		echo "${hosts}" \
-		| grep -F "${inets}" \
-		| sed -e 's|^;||'
-	)"
-
-	local rights="$(
-		echo "${hosts}" \
-		| grep -F -v "${lefts}" \
-		| sed -e 's|^;||'
-	)"
+	local  lefts="$(echo "${hosts}" | grep -F    "${inets}" | sed -e 's|^;||')"
+	local rights="$(echo "${hosts}" | grep -F -v "${lefts}" | sed -e 's|^;||')"
 
 	for _dir in 'in' 'out'; do
 		for _desc in 'proto ipv6-icmp' 'dport 22' 'sport 22'; do
-			ip xfrm policy add dir "${_dir}" \
-				src '::/0' dst '::/0' \
-				${_desc} \
-				priority 2147483548
+			ip xfrm policy add dir "${_dir}" src '::/0'      dst '::/0'      ${_desc} priority 2147483548
 		done
 		for _desc in 'proto icmp' 'dport 22' 'sport 22'; do
-			ip xfrm policy add dir "${_dir}" \
-				src '0.0.0.0/0' dst '0.0.0.0/0' \
-				${_desc} \
-				priority 2147483548
+			ip xfrm policy add dir "${_dir}" src '0.0.0.0/0' dst '0.0.0.0/0' ${_desc} priority 2147483548
 		done
 	done
 
