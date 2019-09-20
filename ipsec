@@ -26,22 +26,15 @@ restart() {
 }
 
 run() {
-	if [ $1 == "start" ]; then
-		log "Staring IPsec ... "
-		start
-	elif [ $1 == "update" ]; then
-		log "Updating IPsec ..."
-		update
-	elif [ $1 == "stop" ]; then
-		log "Stopping IPsec ..."
-		stop
-	elif [ $1 == "restart" ]; then
-		log "Restarting IPsec ..."
-		restart
-	else
-		echo "$1 - invalid command"
-		log "$1 - invalid command"
-	fi
+	case "${1}"
+	in
+		start|stop|restart|update|flush)
+			log "IPsec ${1} ..."
+			${1}
+		;;
+
+		*) eerror "Invalid command: ${1}" ;;
+	esac
 }
 
 run $1
