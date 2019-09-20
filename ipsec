@@ -1,6 +1,8 @@
 #! /bin/sh
 
-source ./ipsec-xfrm
+PROG_DIR=${PROG_DIR:-"$(realpath $(dirname "${0}"))"}
+
+source "${PROG_DIR}/ipsec-xfrm"
 
 log() {
 	echo "$@"
