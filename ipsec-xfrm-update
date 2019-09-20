@@ -26,6 +26,13 @@ set +e
 cmp "${IPSEC_HOSTS_STABLE}" "${IPSEC_HOSTS_UPDATE}"
 if [[ $? == 1 ]]
 then
+	# Uncomment following line if you want to use this in conjunction with
+	# SystemD, but do not forget to comment or remove the next one!
+
+	# SystemD:
+	#/usr/sbin/ipsec update
+
+	# OpenRC:
 	rc-service ipsec-xfrm update
 elif [[ $? == 2 ]]
 then
