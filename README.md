@@ -9,6 +9,12 @@ The `ipsechosts` and `ipsechosts-update` files are blank-separated-value list
 with following format:
 
 ```
-# ip-address        domain-name       unique-id    hex-key
-2001:67c:15a1::a    aq.virusfree.cz   1            00112233445566778899aabbccddeeff00112233
+# ip-address        domain-name       unique-hex-id    hex-key
+2001:67c:15a1::a    aq.virusfree.cz   1                00112233445566778899aabbccddeeff00112233
 ```
+
+* `ip-address` - IPv4 or IPv6 address,
+* `domain-name` - user identifier, it is not used by code,
+* `unique-hex-id` - up to 16 bits long hexadecimal number [0-ffff]. There is
+no need to have leading 0 in the number.
+* `hex-key` - the key

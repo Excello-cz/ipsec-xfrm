@@ -70,7 +70,7 @@ load() {
 	local ipsechosts="${1}"
 
 	local inets="$(ip a | sed -n -e 's/^.*\(inet\|inet6\) \([0-9a-f:.]*\)\/.*$/;\2;/p')"
-	local hosts="$(awk '$1 ~ /^[0-9a-f:.]+$/{ print ";" $1 ";" $3 $4 }' "${ipsechosts}")"
+	local hosts="$(awk '$1 ~ /^[0-9a-f:.]+$/{ printf ";%s;%04x%s\n", $1, strtonum("0x" $3), $4 }' "${ipsechosts}")"
 
 	local  lefts="$(echo "${hosts}" | grep -F    "${inets}" | sed -e 's|^;||')"
 	local rights="$(echo "${hosts}" | grep -F -v "${lefts}" | sed -e 's|^;||')"
@@ -104,12 +104,12 @@ setxfrm() {
 	local rightkey="${2##*;}"
 	ip xfrm state add \
 		src "${lefthost}" dst "${righthost}" \
-		proto esp spi "0x${leftkey:0:2}${rightkey:0:2}" \
-		mode transport aead "rfc4106(gcm(aes))" "0x${rightkey:2}" 96
+		proto esp spi "0x${leftkey:0:4}${rightkey:0:4}" \
+		mode transport aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96
 	ip xfrm state add \
 		src "${righthost}" dst "${lefthost}" \
-		proto esp spi "0x${rightkey:0:2}${leftkey:0:2}" \
-		mode transport aead "rfc4106(gcm(aes))" "0x${leftkey:2}" 96
+		proto esp spi "0x${rightkey:0:4}${leftkey:0:4}" \
+		mode transport aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96
 	ip xfrm policy add dir out \
 		src "${lefthost}" dst "${righthost}" \
 		priority 2147483648 tmpl proto esp mode transport
