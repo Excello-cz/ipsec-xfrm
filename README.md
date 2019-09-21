@@ -18,3 +18,9 @@ with following format:
 * `unique-hex-id` - up to 16 bits long hexadecimal number [0-ffff]. There is
 no need to have leading 0 in the number.
 * `hex-key` - the key
+
+## SystemD users
+
+Use `ipsec.service` if you wish to use this on SystemD powered system. It
+currently expects to have `ipsec` and `ipsec-xfrm` script located `/usr/sbin`.
+The `ipsec-xfrm-update` cron job needs to be modified appropriately.
