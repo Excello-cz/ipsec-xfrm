@@ -22,5 +22,5 @@ no need to have leading 0 in the number.
 ## SystemD users
 
 Use `ipsec.service` if you wish to use this on SystemD powered system. It
-currently expects to have `ipsec` and `ipsec-xfrm` script located `/usr/sbin`.
-The `ipsec-xfrm-update` cron job needs to be modified appropriately.
+currently expects to have `ipsec` and `ipsec-xfrm` scripts in `/usr/local/bin`
+location.  The `ipsec-xfrm-update` cron job needs to be modified appropriately.

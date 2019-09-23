@@ -30,7 +30,7 @@ then
 	# SystemD, but do not forget to comment or remove the next one!
 
 	# SystemD:
-	#/usr/sbin/ipsec update
+	#/usr/local/bin/ipsec update
 
 	# OpenRC:
 	rc-service ipsec-xfrm update

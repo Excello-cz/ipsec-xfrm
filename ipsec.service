@@ -8,8 +8,8 @@ After=network-online.target
 Type=oneshot
 User=root
 RemainAfterExit=yes
-ExecStart=/usr/sbin/ipsec start
-ExecStop=/usr/sbin/ipsec stop
+ExecStart=/usr/local/bin/ipsec start
+ExecStop=/usr/local/bin/ipsec stop
 
 [Install]
 WantedBy=multi-user.target
