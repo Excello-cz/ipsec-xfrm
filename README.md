@@ -13,7 +13,8 @@ with following format:
 
 ```
 # ip-address        domain-name       unique-hex-id    hex-key
-2001:67c:15a1::a    aq.virusfree.cz   1                00112233445566778899aabbccddeeff00112233
+2001:67c:15a1::a1   ax.virusfree.cz   1                00112233445566778899aabbccddeeff00112233
+2001:67c:15a1::b1   bx.virusfree.cz   2                aabbccddeeff00112233445566778899aabbccdd
 ```
 
 * `ip-address` - IPv4 or IPv6 address,
