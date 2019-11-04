@@ -1,8 +1,8 @@
 # ipsec-xfrm
 
-This repository contains OpenRC service `ipsec-xfrm` which loads ipsec xfrm
-rules from `/var/lib/ipsec/ipsechost` file and applies them with `ip xfrm`
-command.
+This repository contains OpenRC and SystemD services for `ipsec-xfrm` which
+loads ipsec xfrm rules from `/var/lib/ipsec/ipsechost` file and applies them
+with `ip xfrm` command.
 
 The `ipsec-xfrm-update` script syncs rules from remote rsync service, merges
 all synced files to `ipsechosts-update` and reloads the `ipsec-xfrm` service.
@@ -22,6 +22,10 @@ with following format:
 * `unique-hex-id` - up to 16 bits long hexadecimal number [0-ffff]. There is
 no need to have leading 0 in the number.
 * `hex-key` - the key
+
+## OpenRC users
+
+Install `ipsec-xfrm` to OpenRC `init.d` directory.
 
 ## SystemD users
 
