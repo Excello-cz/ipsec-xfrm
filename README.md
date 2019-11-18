@@ -4,9 +4,10 @@ This repository contains OpenRC and SystemD services for `ipsec-xfrm` which
 loads ipsec xfrm rules from `/var/lib/ipsec/ipsechost` file and applies them
 with `ip xfrm` command.
 
-The `ipsec-xfrm-update` script syncs rules from remote rsync service, merges
-all synced files to `ipsechosts-update` and reloads the `ipsec-xfrm` service.
-It is meant to be run by cron job hourly.
+The `ipsec-xfrm-update` script syncs rules from remote service over ssh with
+[`lftp`](https://lftp.tech/) program, merges all synced files to
+`ipsechosts-update` and reloads the `ipsec-xfrm` service.  It is meant to be
+run by cron job hourly.
 
 The `ipsechosts` and `ipsechosts-update` files are blank-separated-value list
 with following format:

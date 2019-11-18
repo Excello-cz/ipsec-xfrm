@@ -6,10 +6,8 @@ umask 077
 
 IPSEC_DIR='/var/lib/ipsec'
 
-# End the path with '/' if you sync a directory. (See rsync(1) for more information.
 # The SYNC_PATH MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
 SYNC_PATH="${IPSEC_DIR}/update/ipsechosts-sync"
-SYNC_FROM="${SYNC_PATH}"
 
 mkdir -p "$(dirname ${SYNC_PATH})"
 
@@ -22,7 +20,14 @@ then
 	exit 2
 fi
 
-rsync -togurz --delete "rsync://sync.virusfree.cz${SYNC_FROM}" "${SYNC_PATH}"
+# Read about options of mirror command in lftp(1) if you need to exclude some
+# files based on regular expresion or glob pattern.
+lftp "sftp://$(hostname):DUMMY@sync.virusfree.cz" <<EOS
+	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
+	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${SYNC_PATH}
+	exit
+EOS
+
 find "${SYNC_PATH}" -type f -print0 \
 | xargs -0n1 sh -c 'echo "# data from file $0"; cat $0; echo' \
 > ${IPSEC_HOSTS_UPDATE}
