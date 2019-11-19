@@ -6,17 +6,17 @@ umask 077
 
 IPSEC_DIR='/var/lib/ipsec'
 
-# The SYNC_PATH MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
-SYNC_PATH="${IPSEC_DIR}/update/ipsechosts-sync"
+# The IPSEC_HOSTS_SYNC MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
+IPSEC_HOSTS_SYNC="${IPSEC_DIR}/update/ipsechosts-sync"
 
-mkdir -p "$(dirname ${SYNC_PATH})"
+mkdir -p "$(dirname ${IPSEC_HOSTS_SYNC})"
 
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
-if [ "${SYNC_PATH}" == "${IPSEC_HOSTS_STABLE}" -o "${SYNC_PATH}" == "${IPSEC_HOSTS_UPDATE}" ]
+if [ "${IPSEC_HOSTS_SYNC}" == "${IPSEC_HOSTS_STABLE}" -o "${IPSEC_HOSTS_SYNC}" == "${IPSEC_HOSTS_UPDATE}" ]
 then
-	echo "SYNC_PATH MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!" >&2
+	echo "IPSEC_HOSTS_SYNC MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!" >&2
 	exit 2
 fi
 
@@ -24,11 +24,11 @@ fi
 # files based on regular expresion or glob pattern.
 lftp "sftp://$(hostname):DUMMY@sync.virusfree.cz" <<EOS
 	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
-	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${SYNC_PATH}
+	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${IPSEC_HOSTS_SYNC}
 	exit
 EOS
 
-find "${SYNC_PATH}" -type f -print0 \
+find "${IPSEC_HOSTS_SYNC}" -type f -print0 \
 | xargs -0n1 sh -c 'echo "# data from file $0"; cat $0; echo' \
 > ${IPSEC_HOSTS_UPDATE}
 
