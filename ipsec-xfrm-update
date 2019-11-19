@@ -16,6 +16,12 @@ mkdir -p "$(dirname ${SYNC_PATH})"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
+if [ "${SYNC_PATH}" == "${IPSEC_HOSTS_STABLE}" -o "${SYNC_PATH}" == "${IPSEC_HOSTS_UPDATE}" ]
+then
+	echo "SYNC_PATH MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!" >&2
+	exit 2
+fi
+
 rsync -togurz --delete "rsync://sync.virusfree.cz${SYNC_FROM}" "${SYNC_PATH}"
 find "${SYNC_PATH}" -type f -print0 \
 | xargs -0n1 sh -c 'echo "# data from file $0"; cat $0; echo' \
