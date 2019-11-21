@@ -6,6 +6,8 @@ umask 077
 
 IPSEC_DIR='/var/lib/ipsec'
 
+SYNC_HOST='sync.virusfree.cz'
+
 # The IPSEC_HOSTS_SYNC MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
 IPSEC_HOSTS_SYNC="${IPSEC_DIR}/update/ipsechosts-sync"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
@@ -21,7 +23,7 @@ mkdir -p "$(dirname ${IPSEC_HOSTS_SYNC})"
 
 # Read about options of mirror command in lftp(1) if you need to exclude some
 # files based on regular expresion or glob pattern.
-lftp "sftp://$(hostname):DUMMY@sync.virusfree.cz" <<EOS
+lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" <<EOS
 	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
 	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${IPSEC_HOSTS_SYNC}
 	exit
