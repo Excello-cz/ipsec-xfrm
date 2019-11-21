@@ -18,7 +18,8 @@ with following format:
 2001:67c:15a1::b1   bx.virusfree.cz   2                aabbccddeeff00112233445566778899aabbccdd
 ```
 
-* `ip-address` - IPv4 or IPv6 address,
+* `ip-address` - IPv4 or IPv6 address (IPv6 address is expected in compressed
+  form. It is compared with address returned by `ip a` command as is.),
 * `domain-name` - user identifier, it is not used by code,
 * `unique-hex-id` - up to 16 bits long hexadecimal number [0-ffff]. There is
 no need to have leading 0 in the number.
