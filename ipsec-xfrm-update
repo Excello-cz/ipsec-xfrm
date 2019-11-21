@@ -8,28 +8,28 @@ IPSEC_DIR='/var/lib/ipsec'
 
 SYNC_HOST='sync.virusfree.cz'
 
-# The IPSEC_HOSTS_SYNC MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
-IPSEC_HOSTS_SYNC="${IPSEC_DIR}/update/ipsechosts-sync"
+# The IPSEC_SYNC_DIR MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
+IPSEC_SYNC_DIR="${IPSEC_DIR}/update/ipsechosts-sync"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
-if [ "${IPSEC_HOSTS_SYNC}" == "${IPSEC_HOSTS_STABLE}" -o "${IPSEC_HOSTS_SYNC}" == "${IPSEC_HOSTS_UPDATE}" ]
+if [ "${IPSEC_SYNC_DIR}" == "${IPSEC_HOSTS_STABLE}" -o "${IPSEC_SYNC_DIR}" == "${IPSEC_HOSTS_UPDATE}" ]
 then
-	echo "IPSEC_HOSTS_SYNC MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!" >&2
+	echo "IPSEC_SYNC_DIR MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!" >&2
 	exit 2
 fi
 
-mkdir -p "$(dirname ${IPSEC_HOSTS_SYNC})"
+mkdir -p "$(dirname ${IPSEC_SYNC_DIR})"
 
 # Read about options of mirror command in lftp(1) if you need to exclude some
 # files based on regular expresion or glob pattern.
 lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" <<EOS
 	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
-	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${IPSEC_HOSTS_SYNC}
+	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${IPSEC_SYNC_DIR}
 	exit
 EOS
 
-find "${IPSEC_HOSTS_SYNC}" -type f -print0 \
+find "${IPSEC_SYNC_DIR}" -type f -print0 \
 | xargs -0n1 sh -c 'echo "# data from file $0"; cat $0; echo' \
 > ${IPSEC_HOSTS_UPDATE}
 
