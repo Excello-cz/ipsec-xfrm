@@ -13,6 +13,11 @@ IPSEC_SYNC_DIR="${IPSEC_DIR}/update/ipsechosts-sync"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
+# This variable passes extra OPTS to a mirror command of lftp(1). Its purpose
+# is to set additional exclude list. LFTP_EXTRA_OPTIONS='--exclude foo' for
+# example.
+LFTP_EXTRA_OPTIONS=''
+
 if [ "${IPSEC_SYNC_DIR}" == "${IPSEC_HOSTS_STABLE}" -o "${IPSEC_SYNC_DIR}" == "${IPSEC_HOSTS_UPDATE}" ]
 then
 	echo "IPSEC_SYNC_DIR MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!" >&2
@@ -25,7 +30,7 @@ mkdir -p "$(dirname ${IPSEC_SYNC_DIR})"
 # files based on regular expresion or glob pattern.
 lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" <<EOS
 	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
-	mirror --delete --delete-excluded --no-empty-dirs /ipsec ${IPSEC_SYNC_DIR}
+	mirror --delete --delete-excluded --no-empty-dirs ${LFTP_EXTRA_OPTIONS} /ipsec ${IPSEC_SYNC_DIR}
 	exit
 EOS
 
