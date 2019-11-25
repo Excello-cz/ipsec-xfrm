@@ -28,7 +28,7 @@ mkdir -p "$(dirname ${IPSEC_SYNC_DIR})"
 
 # Read about options of mirror command in lftp(1) if you need to exclude some
 # files based on regular expresion or glob pattern.
-lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" <<EOS
+lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" > /dev/null <<EOS
 	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
 	mirror --delete --delete-excluded --no-empty-dirs ${LFTP_EXTRA_OPTIONS} /ipsec ${IPSEC_SYNC_DIR}
 	exit
