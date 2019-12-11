@@ -26,6 +26,8 @@ fi
 
 mkdir -p "$(dirname ${IPSEC_SYNC_DIR})"
 
+find "${IPSEC_SYNC_DIR}" -delete
+
 # Read about options of mirror command in lftp(1) if you need to exclude some
 # files based on regular expresion or glob pattern.
 lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" > /dev/null <<EOS
