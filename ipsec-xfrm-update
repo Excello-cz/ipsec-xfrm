@@ -24,9 +24,11 @@ then
 	exit 2
 fi
 
-mkdir -p "$(dirname ${IPSEC_SYNC_DIR})"
-
-find "${IPSEC_SYNC_DIR}" -delete
+if [ -d "${IPSEC_SYNC_DIR}" ]
+then
+	find "${IPSEC_SYNC_DIR}/" -delete
+fi
+mkdir -p "${IPSEC_SYNC_DIR}"
 
 # Read about options of mirror command in lftp(1) if you need to exclude some
 # files based on regular expresion or glob pattern.
