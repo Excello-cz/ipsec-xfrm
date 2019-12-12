@@ -9,7 +9,7 @@ umask 077
 SYNC_HOST='sync.virusfree.cz'
 
 # The IPSEC_SYNC_DIR MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
-IPSEC_SYNC_DIR="${IPSEC_DIR}/update/ipsechosts-sync"
+IPSEC_SYNC_DIR="${IPSEC_DIR}/ipsechosts-sync"
 IPSEC_HOSTS_STABLE="${IPSEC_DIR}/ipsechosts"
 IPSEC_HOSTS_UPDATE="${IPSEC_DIR}/ipsechosts-update"
 
