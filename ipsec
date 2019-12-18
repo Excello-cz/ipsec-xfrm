@@ -8,6 +8,10 @@ log() {
 	echo "$@"
 }
 
+einfo() {
+	log "einfo: $@"
+}
+
 ebegin() {
 	log "ebegin: $@"
 }

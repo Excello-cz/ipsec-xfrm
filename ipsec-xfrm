@@ -54,6 +54,7 @@ check() {
 		fi
 	else
 		eerror "ipsechosts file ${IPSEC_HOSTS_FILE} doesn't exist"
+		einfo "Try to sync new rules with ipsec-xfrm-update script"
 		STATUS_CHECK=2
 	fi
 	eend $STATUS_CHECK
