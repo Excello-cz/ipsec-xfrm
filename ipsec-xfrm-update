@@ -42,20 +42,30 @@ find "${IPSEC_SYNC_DIR}" -type f -print0 \
 | xargs -0rn1 sh -c 'echo "# data from file $0"; cat $0; echo' \
 > ${IPSEC_HOSTS_UPDATE}
 
-set +e
-
-cmp "${IPSEC_HOSTS_STABLE}" "${IPSEC_HOSTS_UPDATE}"
-if [[ $? == 1 ]]
-then
+function manage_service() {
 	# Uncomment following line if you want to use this in conjunction with
 	# SystemD, but do not forget to comment or remove the next one!
 
 	# SystemD:
-	#/usr/local/bin/ipsec update
+	#/usr/local/bin/ipsec "${1}"
 
 	# OpenRC:
-	rc-service ipsec-xfrm update
-elif [[ $? == 2 ]]
+	rc-service ipsec-xfrm "${1}"
+}
+
+if [ -f "${IPSEC_HOSTS_STABLE}" ]
 then
-	exit $?
+	set +e
+	cmp "${IPSEC_HOSTS_STABLE}" "${IPSEC_HOSTS_UPDATE}"
+	if [[ $? == 1 ]]
+	then
+		set -e
+		manage_service 'update'
+	elif [[ $? == 2 ]]
+	then
+		exit $?
+	fi
+else
+	cp "${IPSEC_HOSTS_UPDATE}" "${IPSEC_HOSTS_STABLE}"
+	manage_service 'start'
 fi
