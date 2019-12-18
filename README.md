@@ -7,7 +7,9 @@ with `ip xfrm` command.
 The `ipsec-xfrm-update` script syncs rules from remote service over ssh with
 [`lftp`](https://lftp.tech/) program, merges all synced files to
 `ipsechosts-update` and reloads the `ipsec-xfrm` service.  It is meant to be
-run by cron job hourly.
+run by cron job hourly. `ipsec-xfrm-update` searches for optional configuration
+in `/etc/ipsec-xfrm.conf` file which is regular shell script inherited to the
+`ipsec-xfrm-update` script. See default [`ipsec-xfrm.conf`](ipsec-xfrm.conf)
 
 The `ipsechosts` and `ipsechosts-update` files are blank-separated-value list
 with following format:
