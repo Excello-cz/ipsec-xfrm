@@ -39,7 +39,7 @@ lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" > /dev/null <<EOS
 EOS
 
 find "${IPSEC_SYNC_DIR}" -type f -print0 \
-| xargs -0n1 sh -c 'echo "# data from file $0"; cat $0; echo' \
+| xargs -0rn1 sh -c 'echo "# data from file $0"; cat $0; echo' \
 > ${IPSEC_HOSTS_UPDATE}
 
 set +e
