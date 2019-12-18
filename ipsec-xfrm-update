@@ -43,14 +43,23 @@ find "${IPSEC_SYNC_DIR}" -type f -print0 \
 > ${IPSEC_HOSTS_UPDATE}
 
 function manage_service() {
-	# Uncomment following line if you want to use this in conjunction with
-	# SystemD, but do not forget to comment or remove the next one!
-
-	# SystemD:
-	#/usr/local/bin/ipsec "${1}"
-
-	# OpenRC:
-	rc-service ipsec-xfrm "${1}"
+	# This is sort of naive detection of init system.
+	if [ -x '/etc/init.d/ipsec-xfrm' ]
+	then
+		# OpenRC:
+		rc-service ipsec-xfrm "${1}"
+	elif [ -x '/usr/local/bin/ipsec' ]
+	then
+		# Following script is used in conjunction with SystemD.
+		/usr/local/bin/ipsec "${1}"
+	else
+		echo "Unable to locate OpenRC ipsec-xfrm run script nor SystemD ipsec script" >&2
+		echo "Check if ipsec-xfrm package is installed properly!" >&2
+		echo "" >&2
+		echo "Fill a new issue https://github.com/Excello-cz/ipsec-xfrm/issues/new" >&2
+		echo "if you think it is a bug." >&2
+		exit 1
+	fi
 }
 
 if [ -f "${IPSEC_HOSTS_STABLE}" ]

@@ -33,5 +33,5 @@ Install `ipsec-xfrm` to OpenRC `init.d` directory.
 
 Use `ipsec.service` if you wish to use this on SystemD powered system. It
 currently expects to have `ipsec` and `ipsec-xfrm` scripts located in
-`/usr/local/bin` directory.  The `ipsec-xfrm-update` cron job needs to be
-modified appropriately.
+`/usr/local/bin` directory.
+~~The `ipsec-xfrm-update` cron job needs to be modified appropriately.~~
