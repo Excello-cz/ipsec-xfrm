@@ -34,7 +34,7 @@ mkdir -p "${IPSEC_SYNC_DIR}"
 # files based on regular expresion or glob pattern.
 lftp "sftp://$(hostname):DUMMY@${SYNC_HOST}" > /dev/null <<EOS
 	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
-	mirror --delete --delete-excluded --no-empty-dirs ${LFTP_EXTRA_OPTIONS} /ipsec ${IPSEC_SYNC_DIR}
+	mirror ${LFTP_EXTRA_OPTIONS} /ipsec ${IPSEC_SYNC_DIR}
 	exit
 EOS
 
