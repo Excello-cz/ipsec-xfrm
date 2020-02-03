@@ -14,6 +14,7 @@ fi
 : ${SYNC_HOST:='sync.virusfree.cz'}
 : ${SYNC_USER:="$(hostname)"}
 : ${LFTP_EXTRA_OPTIONS:=''}
+: ${SSH_PRIVATE_KEY:='/etc/ssh/ssh_host_ed25519_key'}
 
 # The IPSEC_SYNC_DIR MUST differ from IPSEC_HOSTS_UPDATE and IPSEC_HOSTS_STABLE!
 IPSEC_SYNC_DIR="${IPSEC_DIR}/ipsechosts-sync"
@@ -35,7 +36,7 @@ mkdir -p "${IPSEC_SYNC_DIR}"
 # Read about options of mirror command in lftp(1) if you need to exclude some
 # files based on regular expresion or glob pattern.
 lftp "sftp://${SYNC_USER}:DUMMY@${SYNC_HOST}" > /dev/null <<EOS
-	set sftp:connect-program 'ssh -axi /etc/ssh/ssh_host_ed25519_key'
+	set sftp:connect-program 'ssh -axi ${SSH_PRIVATE_KEY}'
 	mirror ${LFTP_EXTRA_OPTIONS} /ipsec ${IPSEC_SYNC_DIR}
 	exit
 EOS
