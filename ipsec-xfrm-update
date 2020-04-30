@@ -53,10 +53,10 @@ function manage_service() {
 		rc-service ipsec-xfrm "${1}"
 	elif [ -x '/usr/local/bin/ipsec' ]
 	then
-		# Following script is used in conjunction with SystemD.
+		# Following script is used in conjunction with systemd.
 		/usr/local/bin/ipsec "${1}"
 	else
-		echo "Unable to locate OpenRC ipsec-xfrm run script nor SystemD ipsec script" >&2
+		echo "Unable to locate OpenRC ipsec-xfrm run script nor systemd ipsec script" >&2
 		echo "Check if ipsec-xfrm package is installed properly!" >&2
 		echo "" >&2
 		echo "Fill a new issue https://github.com/Excello-cz/ipsec-xfrm/issues/new" >&2
