@@ -1,6 +1,6 @@
 # ipsec-xfrm
 
-This repository contains OpenRC and SystemD services for `ipsec-xfrm` which
+This repository contains OpenRC and systemd services for `ipsec-xfrm` which
 loads ipsec xfrm rules from `/var/lib/ipsec/ipsechost` file and applies them
 with `ip xfrm` command.
 
@@ -31,9 +31,9 @@ no need to have leading 0 in the number.
 
 Install `ipsec-xfrm` to OpenRC `init.d` directory.
 
-## SystemD users
+## systemd users
 
-Use `ipsec.service` if you wish to use this on SystemD powered system. It
+Use `ipsec.service` if you wish to use this on systemd powered system. It
 currently expects to have `ipsec` and `ipsec-xfrm` scripts located in
 `/usr/local/bin` directory.
 ~~The `ipsec-xfrm-update` cron job needs to be modified appropriately.~~
