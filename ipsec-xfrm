@@ -110,11 +110,11 @@ setxfrm() {
 	ip xfrm state add \
 		src "${lefthost}" dst "${righthost}" \
 		proto esp spi "0x${leftkey:0:4}${rightkey:0:4}" \
-		mode transport aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96
+		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96
 	ip xfrm state add \
 		src "${righthost}" dst "${lefthost}" \
 		proto esp spi "0x${rightkey:0:4}${leftkey:0:4}" \
-		mode transport aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96
+		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96
 	ip xfrm policy add dir out \
 		src "${lefthost}" dst "${righthost}" \
 		priority 2147483648 tmpl proto esp mode transport
