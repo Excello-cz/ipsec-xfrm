@@ -1,5 +1,11 @@
 #!/sbin/openrc-run
 
+# The configuration file is needed here because of $XFRM_STATE_EXTRA_ARGS
+# variable.  This config file is well known for the package, therefore it was
+# decided to preserve it also for the service rather than creating another one
+# in /etc/conf.d.
+source "/etc/ipsec-xfrm.conf"
+
 extra_commands="flush"
 extra_started_commands="update"
 
@@ -110,11 +116,13 @@ setxfrm() {
 	ip xfrm state add \
 		src "${lefthost}" dst "${righthost}" \
 		proto esp spi "0x${leftkey:0:4}${rightkey:0:4}" \
-		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96
+		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96 \
+		"${XFRM_STATE_EXTRA_ARGS[@]}"
 	ip xfrm state add \
 		src "${righthost}" dst "${lefthost}" \
 		proto esp spi "0x${rightkey:0:4}${leftkey:0:4}" \
-		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96
+		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96 \
+		"${XFRM_STATE_EXTRA_ARGS[@]}"
 	ip xfrm policy add dir out \
 		src "${lefthost}" dst "${righthost}" \
 		priority 2147483648 tmpl proto esp mode transport
