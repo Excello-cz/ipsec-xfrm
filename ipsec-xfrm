@@ -113,16 +113,31 @@ setxfrm() {
 	local leftkey="${1##*;}"
 	local righthost="${2%%;*}"
 	local rightkey="${2##*;}"
-	ip xfrm state add \
-		src "${lefthost}" dst "${righthost}" \
-		proto esp spi "0x${leftkey:0:4}${rightkey:0:4}" \
-		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96 \
-		"${XFRM_STATE_EXTRA_ARGS[@]}"
-	ip xfrm state add \
-		src "${righthost}" dst "${lefthost}" \
-		proto esp spi "0x${rightkey:0:4}${leftkey:0:4}" \
-		mode transport extra-flag 0x2 aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96 \
-		"${XFRM_STATE_EXTRA_ARGS[@]}"
+
+	local shared_xfrm_stat_args=(
+		mode transport
+		extra-flag 0x2
+	)
+
+	local out_xfrm_state_args=(
+		src "${lefthost}" dst "${righthost}"
+		proto esp spi "0x${leftkey:0:4}${rightkey:0:4}"
+		aead "rfc4106(gcm(aes))" "0x${rightkey:4}" 96
+	)
+	local in_xfrm_state_args=(
+		src "${righthost}" dst "${lefthost}"
+		proto esp spi "0x${rightkey:0:4}${leftkey:0:4}"
+		aead "rfc4106(gcm(aes))" "0x${leftkey:4}" 96
+	)
+
+	if [ -n "${ENABLE_OFFLOADING}" -a "${ENABLE_OFFLOADING}" == "yes" ]; then
+		einfo "Offloading is enabled"
+		out_xfrm_state_args+=( offload dir out )
+		in_xfrm_state_args+=( offload dir in )
+	fi
+
+	ip xfrm state add "${out_xfrm_state_args[@]}" "${shared_xfrm_stat_args[@]}" "${XFRM_STATE_EXTRA_ARGS[@]}"
+	ip xfrm state add "${in_xfrm_state_args[@]}"  "${shared_xfrm_stat_args[@]}" "${XFRM_STATE_EXTRA_ARGS[@]}"
 	ip xfrm policy add dir out \
 		src "${lefthost}" dst "${righthost}" \
 		priority 2147483648 tmpl proto esp mode transport
