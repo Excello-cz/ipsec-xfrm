@@ -131,7 +131,6 @@ setxfrm() {
 	)
 
 	if [ -n "${ENABLE_OFFLOADING}" -a "${ENABLE_OFFLOADING}" == "yes" ]; then
-		einfo "Offloading is enabled"
 		out_xfrm_state_args+=( offload dir out )
 		in_xfrm_state_args+=( offload dir in )
 	fi
