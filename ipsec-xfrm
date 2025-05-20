@@ -4,7 +4,11 @@
 # variable.  This config file is well known for the package, therefore it was
 # decided to preserve it also for the service rather than creating another one
 # in /etc/conf.d.
-source "/etc/ipsec-xfrm.conf"
+: ${IPSEC_CONF:='/etc/ipsec-xfrm.conf'}
+if [ -r "${IPSEC_CONF}" ]
+then
+	source "${IPSEC_CONF}"
+fi
 
 extra_commands="flush"
 extra_started_commands="update"
