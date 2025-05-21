@@ -2,7 +2,9 @@
 
 This repository contains OpenRC and systemd services for `ipsec-xfrm` which
 loads ipsec xfrm rules from `/var/lib/ipsec/ipsechost` file and applies them
-with `ip xfrm` command.
+with `ip xfrm` command. By default, `ipsec-xfrm` bypasses IPsec policies for
+port 22 (SSH). This can be customized or disabled by setting the `BYPASS_PORTS`
+variable in [`/etc/ipsec-xfrm.conf`](ipsec-xfrm.conf).
 
 The `ipsec-xfrm-update` script syncs rules from remote service over ssh with
 [`lftp`](https://lftp.tech/) program, merges all synced files to
